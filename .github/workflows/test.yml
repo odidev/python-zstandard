@@ -44,6 +44,13 @@ jobs:
           python-version: ${{ matrix.py }}
           architecture: ${{ matrix.arch }}
 
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+          profile: minimal
+
       - uses: actions/checkout@v2
 
       - name: Install Dependencies
@@ -52,7 +59,7 @@ jobs:
 
       - name: Build
         run: |
-          python setup.py develop
+          python setup.py --rust-backend develop
 
       - name: Test C Backend
         run: |
@@ -61,5 +68,11 @@ jobs:
       - name: Test CFFI Backend
         env:
           PYTHON_ZSTANDARD_IMPORT_POLICY: 'cffi'
+        run: |
+          pytest --numprocesses=auto -v tests/
+
+      - name: Test Rust Backend
+        env:
+          PYTHON_ZSTANDARD_IMPORT_POLICY: 'rust'
         run: |
           pytest --numprocesses=auto -v tests/
